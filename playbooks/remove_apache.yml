@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Remove Apache and PHP for Debian based server
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: absent
+        update_cache: no
+      when: ansible_distribution in ["Debian", "Ubuntu"]
+
+    - name: Remove Apache and PHP packages for Fedora based servers
+      dnf:
+        name:
+          - httpd
+          - php
+        state: absent
+        update_cache: no
+      when: ansible_distribution in ["Fedora"]

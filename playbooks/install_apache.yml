@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Install Apache and PHP for Debian based server
+      tags: apache, php, ubuntu, debian,
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: latest
+        update_cache: yes
+      when: ansible_distribution in ["Debian", "Ubuntu"]
+
+    - name: Install Apache and PHP packages for Fedora based servers
+      tags: apache, php, fedora
+      dnf:
+        name:
+          - httpd
+          - php
+        state: latest
+        update_cache: yes
+      when: ansible_distribution in ["Fedora"]

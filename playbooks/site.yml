@@ -1,0 +1,64 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+    - name: Install updates (Fedora based servers)
+      tags: always
+      dnf:
+        update_only: yes
+        update_cache: yes
+      when: ansible_distribution in ["Fedora"]
+
+    - name: Install updates (Debian based servers)
+      tags: always
+      apt:
+        upgrade: dist
+        update_cache: yes
+      when: ansible_distribution in ["Debian", "Ubuntu"]
+
+- hosts: web_servers
+  become: true
+  tasks:
+    - name: Install Apache and PHP for Debian based server
+      tags: apache, apache2, ubuntu, debian
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: latest
+      when: ansible_distribution in ["Debian", "Ubuntu"]
+
+    - name: Install Apache and PHP packages for Fedora based servers
+      tags: apache, fedora, httpd
+      dnf:
+        name:
+          - httpd
+          - php
+        state: latest
+      when: ansible_distribution in ["Fedora"]
+
+    - name: Copy default html file
+      tags: apache, apache2, httpd
+      copy:
+        src: default_site.html
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: 0644
+
+- hosts: db_servers
+  become: true
+  tasks:
+    - name: install MongoDB for Debian based servers
+      tags: ubuntu, debian, db, mariadb
+      apt:
+        name: mariadb-server
+        state: latest
+      when: ansible_distribution in ["Debian", "Ubuntu"]
+
+    - name: install MongoDB for Fedora based servers
+      tags: fedora, db, mariadb
+      dnf:
+        name: mariadb
+        state: latest
+      when: ansible_distribution in ["Fedora"]
